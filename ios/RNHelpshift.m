@@ -203,13 +203,15 @@ RCT_CUSTOM_VIEW_PROPERTY(config, NSDictionary, RNTHelpshiftManager) {
 
   // For Expo client, use the same logic as in ExpoKit currentViewController but this isn't a unimodule
   // so adapt it for here
-  UIViewController *contentController = [controller performSelector:@selector(contentViewController)];
+  if ([controller respondsToSelector:@selector(contentViewController)]) {
+      UIViewController *contentController = [controller performSelector:@selector(contentViewController)];
 
-  if (contentController != nil) {
-    controller = contentController;
-    while (controller.presentedViewController != nil) {
-      controller = controller.presentedViewController;
-    }
+      if (contentController != nil) {
+        controller = contentController;
+        while (controller.presentedViewController != nil) {
+          controller = controller.presentedViewController;
+        }
+      }
   }
 
   return controller;
