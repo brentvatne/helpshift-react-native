@@ -4,7 +4,6 @@
 #import <React/RCTEventEmitter.h>
 
 #import "RNHelpshift.h"
-
 #import "HelpshiftCore.h"
 #import "HelpshiftSupport.h"
 
@@ -32,7 +31,7 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(init:(NSString *)apiKey domain:(NSString *)domain appId:(NSString *)appId)
 {
     [HelpshiftCore initializeWithProvider:[HelpshiftSupport sharedInstance]];
-    [HelpshiftCore installForApiKey:apiKey domainName:domain appID:appId];   
+    [HelpshiftCore installForApiKey:apiKey domainName:domain appID:appId];
 }
 
 RCT_EXPORT_METHOD(login:(NSDictionary *)user)
@@ -170,17 +169,17 @@ RCT_CUSTOM_VIEW_PROPERTY(config, NSDictionary, RNTHelpshiftManager) {
         if (user[@"authToken"]) userBuilder.authToken = user[@"authToken"];
         [HelpshiftCore login:userBuilder.build];
     }
-    
+
     // Get the Helpshift conversation view controller.
     HelpshiftAPIConfigBuilder *builder = [HelpshiftAPIConfigBuilder new];
     // Add CIFS if existing
     if (json[@"cifs"]) builder.customIssueFields = json[@"cifs"];
     [HelpshiftSupport conversationViewControllerWithConfig:[builder build] completion:^(UIViewController *conversationVC) {
         UIViewController *rootController = [self currentViewController];
-        
+
         UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:conversationVC];
         [navController willMoveToParentViewController:rootController];
-        
+
         if (json[@"height"] && json[@"width"]) {
             float height = [json[@"height"] floatValue];
             float width = [json[@"width"] floatValue];
@@ -196,11 +195,23 @@ RCT_CUSTOM_VIEW_PROPERTY(config, NSDictionary, RNTHelpshiftManager) {
 - (UIViewController *)currentViewController {
   UIViewController *controller = [[[UIApplication sharedApplication] keyWindow] rootViewController];
   UIViewController *presentedController = controller.presentedViewController;
-  
+
   while (presentedController && ![presentedController isBeingDismissed]) {
     controller = presentedController;
     presentedController = controller.presentedViewController;
   }
+
+  // For Expo client, use the same logic as in ExpoKit currentViewController but this isn't a unimodule
+  // so adapt it for here
+  UIViewController *contentController = [controller performSelector:@selector(contentViewController)];
+
+  if (contentController != nil) {
+    controller = contentController;
+    while (controller.presentedViewController != nil) {
+      controller = controller.presentedViewController;
+    }
+  }
+
   return controller;
 }
 
