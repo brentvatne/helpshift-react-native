@@ -2,9 +2,9 @@ import React from 'react';
 
 export default class Helpshift extends React.Component {
   static eventEmitter = {
-    addListener = () => {},
-    removeListeners = () => {},
-    removeAllListeners = () => {},
+    addListener: () => {},
+    removeListener: () => {},
+    removeAllListeners: () => {},
   };
 
   static init = () => {};
